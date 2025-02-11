@@ -21,6 +21,6 @@ def LoadModel():
     - Gemini: An instance of the Gemini class initialized with the 'gemini-pro' model.
     """
     
-    model=Gemini(models='gemini-1.5-pro',api_key=google_api_key)
+    model=Gemini(models='gemini-1.5-pro',api_key=google_api_key,temperature=0)
     return model
   

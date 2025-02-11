@@ -1,0 +1,46 @@
+{
+    "cgpa_of_candidate": {
+        "type": "quantitative",
+        "weight": 0.3,
+        "description": "CGPA of Candidate",
+        "max_value": 4.0,
+        "benefit_type": "higher"
+    },
+    "years_of_experience": {
+        "type": "quantitative",
+        "weight": 0.3,
+        "description": "Years of experience",
+        "max_value": 10.0,
+        "benefit_type": "higher"
+    },
+    "is_an_employee_of_codeworks?": {
+        "type": "boolean",
+        "weight": 0.3,
+        "description": "Is an employee of CodeWorks?"
+    },
+    "is_an_employee_of_google?": {
+        "type": "boolean",
+        "weight": 0.3,
+        "description": "Is an employee of Google?"
+    },
+    "is_a_passout_of_northen_tech_university?": {
+        "type": "boolean",
+        "weight": 0.3,
+        "description": "Is a Passout of Northen Tech University?"
+    },
+    "is_a_passout_of_iit?": {
+        "type": "boolean",
+        "weight": 0.3,
+        "description": "Is a Passout of IIT?"
+    },
+    "knows_react_framework?": {
+        "type": "boolean",
+        "weight": 0.3,
+        "description": "Knows React framework?"
+    },
+    "knows_springboot_framework?": {
+        "type": "boolean",
+        "weight": 0.3,
+        "description": "Knows Springboot framework?"
+    }
+}
