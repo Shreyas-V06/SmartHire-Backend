@@ -1,0 +1,58 @@
+[
+    {
+        "name": "Is an employee of CodeWorks?",
+        "category": "boolean",
+        "weight": 1,
+        "max_value": null,
+        "benefit_type": null
+    },
+    {
+        "name": "Is student of IIT?",
+        "category": "boolean",
+        "weight": 1,
+        "max_value": null,
+        "benefit_type": null
+    },
+    {
+        "name": "Is a Passout of Northen Tech University?",
+        "category": "boolean",
+        "weight": 1,
+        "max_value": null,
+        "benefit_type": null
+    },
+    {
+        "name": "Knows Springboot framework?",
+        "category": "boolean",
+        "weight": 1,
+        "max_value": null,
+        "benefit_type": null
+    },
+    {
+        "name": "Knows React framework?",
+        "category": "boolean",
+        "weight": 1,
+        "max_value": null,
+        "benefit_type": null
+    },
+    {
+        "name": "Knows Python?",
+        "category": "boolean",
+        "weight": 1,
+        "max_value": null,
+        "benefit_type": null
+    },
+    {
+        "name": "Knows Golang?",
+        "category": "boolean",
+        "weight": 1,
+        "max_value": null,
+        "benefit_type": null
+    },
+    {
+        "name": "Knows LlamaIndex?",
+        "category": "boolean",
+        "weight": 1,
+        "max_value": null,
+        "benefit_type": null
+    }
+]

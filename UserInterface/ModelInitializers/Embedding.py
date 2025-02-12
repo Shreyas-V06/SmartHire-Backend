@@ -18,7 +18,7 @@ def DownloadGeminiEmbedding(model, documents):
 
     Settings.llm = model
     Settings.embed_model = gemini_embed_model 
-    Settings.chunk_size = 40
+    Settings.chunk_size = 70
     Settings.chunk_overlap = 10
 
     index = VectorStoreIndex.from_documents(documents)

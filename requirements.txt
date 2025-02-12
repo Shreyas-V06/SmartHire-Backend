@@ -5,7 +5,9 @@ Pypdf
 python-dotenv
 IPython
 llama-index-embeddings-gemini
-streamlit
+streamlit>=1.30.0
 numpy
 pandas
 scikit-learn
+PyPDF2>=3.0.0
+llama-index-core>=0.10.0

@@ -6,10 +6,8 @@ load_dotenv()
 google_api_key=os.getenv('GOOGLE_API_KEY') 
 llm = Gemini(models='gemini-1.5-pro',api_key=google_api_key)
 
-
-def classify_parameter(parameter):
-       
-    #CLASSIFICATION PROMPT:
+def ClassifyParameter(parameter):
+    # CLASSIFICATION PROMPT:
     prompt = f"""
     You are an AI system designed to assist in resume screening. 
     Your task is to classify the given parameter into one of three categories:
@@ -25,12 +23,10 @@ def classify_parameter(parameter):
     - Output must be a single word only and should be exactly any three of these
     'Quantitative','Boolean' or 'Textual'
     
-    
     **Input Parameter:** "{parameter}"
     """
    
     response = llm.complete(prompt)
-    return response 
+    return response.text.strip()
 
 
-# print(ClassifyParameter("Years of Experience"))  
