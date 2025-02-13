@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from AdminInterface.LoadParameters import LoadParameterDetails, SaveParameterDetails
 from UserInterface.ModelInitializers.DataIngestion import LoadDocument
 from UserInterface.ScoreCalculators import CalculateQuantitativeScore, CalculateBooleanScore
 from UserInterface.ModelInitializers.Model import LoadModel
@@ -8,10 +7,11 @@ from UserInterface.ModelInitializers.Embedding import DownloadGeminiEmbedding
 from AdminInterface.ClassificationModel import ClassifyParameter
 import plotly.graph_objects as go
 import time
+from Utils.ParameterManager import ParameterManager
 
 def setup_page_config():
     st.set_page_config(
-        page_title="SmartHire System",
+        page_title="SmartHire System-T2",
         page_icon="📄",
         layout="wide",
         initial_sidebar_state="expanded"
@@ -60,32 +60,43 @@ def setup_page_config():
 def admin_interface():
     st.title("Admin Section")
     
-    if 'parameters' not in st.session_state:
-        st.session_state.parameters = []
+    param_manager = ParameterManager()
+    
+    # Initialize session state for parameters if not exists
+    if 'current_session_parameters' not in st.session_state:
+        st.session_state.current_session_parameters = []
+    
+    # Reset parameters button
+    if st.button("Reset Parameters"):
+        st.session_state.current_session_parameters = []
+        st.rerun()
     
     with st.form("parameter_form"):
         st.write("### Add New Parameter")
         name = st.text_input("Parameter Name (e.g., 'Years of Experience')")
-        weight = st.slider("Parameter Weight", 1, 10, 5)
+        weight = st.slider("Parameter Weight", min_value=0.0, max_value=20.0, value=5.0, step=0.1)
         
         if st.form_submit_button("Process Parameter"):
-            category = ClassifyParameter(name).strip().lower()
-            if category == "quantitative":
-                st.session_state.new_param = {
-                    "name": name,
-                    "category": category,
-                    "weight": weight,
-                    "max_value": None,
-                    "benefit_type": None
-                }
-            else:
-                st.session_state.parameters.append({
-                    "name": name,
-                    "category": category,
-                    "weight": weight,
-                    "max_value": None,
-                    "benefit_type": None
-                })
+            if name:  # Only process if name is not empty
+                category = ClassifyParameter(name).strip().lower()
+                if category == "quantitative":
+                    st.session_state.new_param = {
+                        "name": name,
+                        "category": category,
+                        "weight": weight,
+                        "max_value": None,
+                        "benefit_type": None
+                    }
+                else:
+                    new_param = {
+                        "name": name,
+                        "category": category,
+                        "weight": weight,
+                        "max_value": None,
+                        "benefit_type": None
+                    }
+                    st.session_state.current_session_parameters.append(new_param)
+                st.rerun()
     
     if 'new_param' in st.session_state:
         st.write("### Set Quantitative Parameter Details")
@@ -93,19 +104,54 @@ def admin_interface():
         st.session_state.new_param["benefit_type"] = st.selectbox("Benefit Type", ["High is better", "Low is better"])
         
         if st.button("Save Quantitative Parameter"):
-            st.session_state.parameters.append(st.session_state.new_param)
+            st.session_state.current_session_parameters.append(st.session_state.new_param)
             del st.session_state.new_param
+            st.rerun()
     
-    if st.session_state.parameters:
-        st.write("### Current Parameters")
-        df = pd.DataFrame(st.session_state.parameters)
-        st.dataframe(df, use_container_width=True)
+    if st.session_state.current_session_parameters:
+        st.write("### Current Session Parameters")
         
-        if st.button("Save Parameters"):
-            SaveParameterDetails(st.session_state.parameters)
-            st.success("Parameters saved successfully!")
+        # Create a more attractive dataframe
+        df = pd.DataFrame(st.session_state.current_session_parameters)
+        
+        # Rename columns for better display
+        df = df.rename(columns={
+            'name': 'Parameter Name',
+            'category': 'Type',
+            'weight': 'Weight',
+            'max_value': 'Maximum Value',
+            'benefit_type': 'Scoring Type'
+        })
+        
+        # Apply styling to the dataframe
+        styled_df = df.style.set_properties(**{
+            'background-color': '#f0f2f6',
+            'color': '#1e1e1e',
+            'border-color': '#e1e4e8'
+        }).set_table_styles([
+            {'selector': 'th',
+             'props': [('background-color', '#0e1117'),
+                      ('color', 'white'),
+                      ('font-weight', 'bold'),
+                      ('padding', '12px 15px')]},
+            {'selector': 'td',
+             'props': [('padding', '8px 15px')]},
+        ]).hide(axis="index")
+        
+        st.dataframe(styled_df, use_container_width=True)
+        
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            if st.button("Save All Parameters", key="save_params"):
+                param_manager.save_parameters(st.session_state.current_session_parameters)
+                st.success("Parameters saved successfully!")
+                # Keep the parameters in session until explicitly reset
+        with col2:
+            st.info("Click 'Reset Parameters' at the top to start fresh.")
 
 def user_interface():
+    param_manager = ParameterManager()
+    
     st.title("User Section")
     
     uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
@@ -113,79 +159,59 @@ def user_interface():
     if uploaded_file is not None:
         try:
             with st.spinner("Processing resume..."):
-                # Load the document and extract text properly
+                # Load document and initialize query engine
                 documents = LoadDocument(uploaded_file)
-                # Handle documents based on their actual structure
-                resume_text = ""
-                if isinstance(documents, list):
-                    resume_text = " ".join([str(doc) for doc in documents])
-                else:
-                    resume_text = str(documents)
-                
-                # Initialize model and query engine for boolean parameters
+                if not documents:
+                    st.error("Could not process the uploaded file")
+                    return
+                    
                 model = LoadModel()
                 query_engine = DownloadGeminiEmbedding(model, documents)
                 
-                # Load parameter details
-                parameter_details = LoadParameterDetails()
-                
-                # Calculate scores
+                # Load parameters and calculate scores
+                parameter_details = param_manager.get_parameter_details()
+                if not parameter_details:
+                    st.warning("No parameters configured. Please set up parameters in the Admin Section first.")
+                    return
+                    
                 total_weighted_score = 0
                 total_weight = 0
                 scores = {}
                 
-                # Add progress bar
-                progress_bar = st.progress(0)
-                status_text = st.empty()
-                
-                # Calculate scores with batching
-                total_params = len(parameter_details)
-                batch_size = 3  # Process 3 parameters at a time
-                
-                for i in range(0, len(parameter_details), batch_size):
-                    batch = parameter_details[i:i + batch_size]
-                    
-                    for param_detail in batch:
-                        param_name = param_detail["name"]
-                        try:
-                            if param_detail["category"].lower() == "quantitative":
-                                score = CalculateQuantitativeScore(
-                                    parameter=param_name,
-                                    max_value=param_detail["max_value"],
-                                    benefit_type=param_detail["benefit_type"],
-                                    resume_text=resume_text
-                                )
-                            elif param_detail["category"].lower() == "boolean":
-                                score = CalculateBooleanScore(
-                                    parameter=param_name,
-                                    query_engine=query_engine
-                                )
-                            else:
-                                continue
-                            
-                            weighted_score = score * param_detail["weight"]
-                            total_weighted_score += weighted_score
-                            total_weight += param_detail["weight"]
+                for param_name, details in parameter_details.items():
+                    try:
+                        if details["type"] == "quantitative":
+                            score = CalculateQuantitativeScore(
+                                parameter=details["description"],
+                                max_value=details["max_value"],
+                                benefit_type=details["benefit_type"],
+                                query_engine=query_engine
+                            )
                             scores[param_name] = {
                                 "raw_score": score,
-                                "weighted_score": weighted_score,
-                                "weight": param_detail["weight"]
+                                "weighted_score": score * details["weight"],
+                                "weight": details["weight"]
                             }
-                            
-                        except Exception as e:
-                            st.warning(f"Error processing parameter {param_name}: {str(e)}")
+                        elif details["type"] == "boolean":
+                            score = CalculateBooleanScore(
+                                parameter=details["description"],
+                                query_engine=query_engine
+                            )
+                            scores[param_name] = {
+                                "raw_score": score,
+                                "weighted_score": score * details["weight"],
+                                "weight": details["weight"]
+                            }
+                        else:
                             continue
                         
-                        # Update progress
-                        progress = min((i + len(scores)) / total_params, 1.0)
-                        progress_bar.progress(progress)
-                        status_text.text(f"Processing parameters... {int(progress * 100)}%")
+                        weighted_score = score * details["weight"]
+                        total_weighted_score += weighted_score
+                        total_weight += details["weight"]
                         
-                    # Add delay between batches
-                    time.sleep(2)
-                
-                progress_bar.empty()
-                status_text.empty()
+                    except Exception as e:
+                        st.warning(f"Error processing parameter {param_name}: {str(e)}")
+                        continue
 
                 # Display results
                 st.header("Evaluation Results")

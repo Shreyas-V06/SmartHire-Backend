@@ -1,3 +1,29 @@
-venv/
-__pycache__/
+# Environment variables
 .env
+venv/
+env/
+ENV/
+
+# Local storage
+Experiments/storage/
+UserInterface/cache/
+parameters.json
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Experiment files
+**/*.ipynb_checkpoints/
+Experiments/*.ipynb
+
+# IDE specific
+.vscode/
+.idea/
+
+# Local development
+*.log
+.DS_Store
+Thumbs.db

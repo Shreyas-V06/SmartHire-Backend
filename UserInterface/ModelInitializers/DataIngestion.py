@@ -51,8 +51,8 @@ def extract_sections(text):
         "skills": skills_section.strip(),
     }
 
-# Create rate limiter instance
-rate_limiter = RateLimiter(max_requests=50, time_window=60)
+# Create rate limiter instance with correct parameter name
+rate_limiter = RateLimiter(max_requests=50, window_size=60)
 
 def get_cache_path(file_hash):
     cache_dir = os.path.join(os.path.dirname(__file__), '../cache')
