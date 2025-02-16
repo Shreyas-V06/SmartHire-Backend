@@ -8,11 +8,11 @@ from sentence_transformers import SentenceTransformer, util
 
 # Gemini API settings
 GEMINI_API_ENDPOINT = "https://api.gemini.example.com/v1/generate"  # Replace with the actual endpoint
-GEMINI_API_KEY = "insert_key"  # Replace with your key
+GEMINI_API_KEY = "GOOGLE_API_KEY"  # Replace with your key
 GEMINI_TEMPERATURE = 0.3  # Lower temperature for more deterministic responses
 
 # GitHub API settings
-GITHUB_API_TOKEN = "insert_key"  # Replace with your GitHub token
+GITHUB_API_TOKEN = "GITHUB_API_KEY"  # Replace with your GitHub token
 GITHUB_API_ENDPOINT = "https://api.github.com"
 
 # Normalization factor for project scoring
