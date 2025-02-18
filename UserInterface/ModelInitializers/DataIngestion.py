@@ -51,7 +51,7 @@ def extract_sections(text):
         "skills": skills_section.strip(),
     }
 
-# Create rate limiter instance with correct parameter name
+# Fix the parameter name to match RateLimiter class
 rate_limiter = RateLimiter(max_requests=50, window_size=60)
 
 def get_cache_path(file_hash):

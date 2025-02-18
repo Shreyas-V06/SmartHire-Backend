@@ -1,37 +1,16 @@
 [
     {
-        "name": "CGPA of candidate",
-        "category": "quantitative",
-        "weight": 5.0,
-        "max_value": 10.0,
-        "benefit_type": "High is better"
-    },
-    {
-        "name": "years of experience",
-        "category": "quantitative",
-        "weight": 5.0,
-        "max_value": 10.0,
-        "benefit_type": "High is better"
-    },
-    {
-        "name": "Age of the candidate",
-        "category": "quantitative",
-        "weight": 5.0,
-        "max_value": 30.0,
-        "benefit_type": "High is better"
-    },
-    {
-        "name": "Knows version control",
-        "category": "boolean",
+        "name": "Knowledge of Generative AI",
+        "category": "textual",
         "weight": 5.0,
         "max_value": null,
         "benefit_type": null
     },
     {
-        "name": "tenure of candidate",
-        "category": "quantitative",
+        "name": "Knowledge of Web development",
+        "category": "textual",
         "weight": 5.0,
-        "max_value": 10.0,
-        "benefit_type": "High is better"
+        "max_value": null,
+        "benefit_type": null
     }
 ]

@@ -1,7 +1,11 @@
 import streamlit as st
 import pandas as pd
 from UserInterface.ModelInitializers.DataIngestion import LoadDocument
-from UserInterface.ScoreCalculators import CalculateQuantitativeScore, CalculateBooleanScore
+from UserInterface.ScoreCalculators import (
+    CalculateQuantitativeScore, 
+    CalculateBooleanScore,
+    CalculateTextualScore  # Add import
+)
 from UserInterface.ModelInitializers.Model import LoadModel
 from UserInterface.ModelInitializers.Embedding import DownloadGeminiEmbedding
 from AdminInterface.ClassificationModel import ClassifyParameter
@@ -154,12 +158,14 @@ def user_interface():
     
     st.title("User Section")
     
+    # Add debug expander
+    debug_mode = st.sidebar.checkbox("Enable Debug Mode")
+    
     uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
     
     if uploaded_file is not None:
         try:
             with st.spinner("Processing resume..."):
-                # Load document and initialize query engine
                 documents = LoadDocument(uploaded_file)
                 if not documents:
                     st.error("Could not process the uploaded file")
@@ -168,134 +174,164 @@ def user_interface():
                 model = LoadModel()
                 query_engine = DownloadGeminiEmbedding(model, documents)
                 
-                # Load parameters and calculate scores
+                # Extract resume text
+                resume_text = " ".join([doc.text for doc in documents])
+                
                 parameter_details = param_manager.get_parameter_details()
                 if not parameter_details:
                     st.warning("No parameters configured. Please set up parameters in the Admin Section first.")
                     return
                     
-                total_weighted_score = 0
-                total_weight = 0
                 scores = {}
+                total_weighted_score = 0.0
+                total_weight = 0.0
                 
                 for param_name, details in parameter_details.items():
                     try:
-                        if details["type"] == "quantitative":
+                        parameter_type = details["type"].lower()
+                        weight = float(details.get("weight", 0))
+                        
+                        if weight <= 0:
+                            continue
+                            
+                        if parameter_type == "textual":
+                            if debug_mode:
+                                st.write(f"---\nProcessing textual parameter: {param_name}")
+                                st.write("Parameter details:", details)
+                                st.write("Resume text sample:", resume_text[:500] + "...")
+                                
+                            score = CalculateTextualScore(
+                                parameter=details["description"],
+                                resume_text=resume_text
+                            )
+                            
+                            if debug_mode:
+                                st.write(f"Response is calculated")
+                                st.write("---")
+                                
+                        elif parameter_type == "quantitative":
                             score = CalculateQuantitativeScore(
                                 parameter=details["description"],
                                 max_value=details["max_value"],
                                 benefit_type=details["benefit_type"],
                                 query_engine=query_engine
                             )
-                            scores[param_name] = {
-                                "raw_score": score,
-                                "weighted_score": score * details["weight"],
-                                "weight": details["weight"]
-                            }
-                        elif details["type"] == "boolean":
+                        elif parameter_type == "boolean":
                             score = CalculateBooleanScore(
                                 parameter=details["description"],
                                 query_engine=query_engine
                             )
-                            scores[param_name] = {
-                                "raw_score": score,
-                                "weighted_score": score * details["weight"],
-                                "weight": details["weight"]
-                            }
-                        else:
-                            continue
                         
-                        weighted_score = score * details["weight"]
+                        weighted_score = score * weight
+                        scores[param_name] = {
+                            "raw_score": score,
+                            "weighted_score": weighted_score,
+                            "weight": weight
+                        }
+                        
+                        if debug_mode:
+                            st.write(f"Final weighted score for {param_name}: {weighted_score}")
+                        
                         total_weighted_score += weighted_score
-                        total_weight += details["weight"]
+                        total_weight += weight
                         
                     except Exception as e:
                         st.warning(f"Error processing parameter {param_name}: {str(e)}")
+                        if debug_mode:
+                            st.error(f"Full error details for {param_name}: {str(e)}")
+                            st.exception(e)
                         continue
-
-                # Display results
-                st.header("Evaluation Results")
                 
-                # Calculate final score as percentage
-                final_score = float((total_weighted_score / total_weight))
-                passing_score = 70.0
-                status = "PASS" if final_score >= passing_score else "FAIL"
-                
-                # Create professional score display with darker background
-                st.markdown(f"""
-                <div style='background-color: #2C3E50; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);'>
-                    <div style='text-align: center; padding: 20px;'>
-                        <h1 style='font-size: 48px; color: {"#00c853" if status == "PASS" else "#ff5252"};'>
-                            {final_score:.2f}
-                        </h1>
-                        <p style='font-size: 24px; color: #ffffff;'>Overall Score</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Display key metrics with darker background
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    st.markdown("""
-                    <div style='background-color: #34495E; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); text-align: center;'>
-                        <h3 style='color: #ffffff;'>Status</h3>
-                    """, unsafe_allow_html=True)
+                # Only calculate final score if we have valid scores
+                if scores and total_weight > 0:
+                    final_score = (total_weighted_score / total_weight)
+                    # Display results
+                    st.header("Evaluation Results")
+                    
+                    # Calculate final score as percentage
+                    final_score = float((total_weighted_score / total_weight))
+                    passing_score = 70.0
+                    status = "PASS" if final_score >= passing_score else "FAIL"
+                    
+                    # Create professional score display with darker background
                     st.markdown(f"""
-                        <h2 style='color: {"#00c853" if status == "PASS" else "#ff5252"};'>{status}</h2>
+                    <div style='background-color: #2C3E50; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);'>
+                        <div style='text-align: center; padding: 20px;'>
+                            <h1 style='font-size: 48px; color: {"#00c853" if status == "PASS" else "#ff5252"};'>
+                                {final_score:.2f}
+                            </h1>
+                            <p style='font-size: 24px; color: #ffffff;'>Overall Score</p>
+                        </div>
                     </div>
                     """, unsafe_allow_html=True)
-                
-                with col2:
+                    
+                    # Display key metrics with darker background
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.markdown("""
+                        <div style='background-color: #34495E; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); text-align: center;'>
+                            <h3 style='color: #ffffff;'>Status</h3>
+                        """, unsafe_allow_html=True)
+                        st.markdown(f"""
+                            <h2 style='color: {"#00c853" if status == "PASS" else "#ff5252"};'>{status}</h2>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    with col2:
+                        st.markdown("""
+                        <div style='background-color: #34495E; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); text-align: center;'>
+                            <h3 style='color: #ffffff;'>Parameters Evaluated</h3>
+                        """, unsafe_allow_html=True)
+                        st.markdown(f"""
+                            <h2 style='color: #ffffff;'>{len(scores)}</h2>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    with col3:
+                        st.markdown("""
+                        <div style='background-color: #34495E; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); text-align: center;'>
+                            <h3 style='color: #ffffff;'>Passing Score</h3>
+                        """, unsafe_allow_html=True)
+                        st.markdown(f"""
+                            <h2 style='color: #ffffff;'>{passing_score:.2f}</h2>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    # Add spacing
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # Display parameter scores in a dark table
                     st.markdown("""
-                    <div style='background-color: #34495E; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); text-align: center;'>
-                        <h3 style='color: #ffffff;'>Parameters Evaluated</h3>
+                    <div style='background-color: #34495E; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);'>
+                        <h3 style='color: #ffffff;'>Parameter Scores</h3>
                     """, unsafe_allow_html=True)
-                    st.markdown(f"""
-                        <h2 style='color: #ffffff;'>{len(scores)}</h2>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-                with col3:
-                    st.markdown("""
-                    <div style='background-color: #34495E; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); text-align: center;'>
-                        <h3 style='color: #ffffff;'>Passing Score</h3>
-                    """, unsafe_allow_html=True)
-                    st.markdown(f"""
-                        <h2 style='color: #ffffff;'>{passing_score:.2f}</h2>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-                # Add spacing
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                # Display parameter scores in a dark table
-                st.markdown("""
-                <div style='background-color: #34495E; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);'>
-                    <h3 style='color: #ffffff;'>Parameter Scores</h3>
-                """, unsafe_allow_html=True)
-                
-                # Create and display the dataframe with proper decimal formatting
-                scores_df = pd.DataFrame([
-                    {
-                        "Parameter": param,
-                        "Score": f"{details['raw_score']:.2f}",
-                        "Weight": f"{details['weight']:.2f}",
-                        "Weighted Score": f"{details['weighted_score']:.2f}"
-                    }
-                    for param, details in scores.items()
-                ])
-                
-                st.dataframe(
-                    scores_df,
-                    hide_index=True,
-                    use_container_width=True
-                )
-                
-                st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # Create and display the dataframe with proper decimal formatting
+                    scores_df = pd.DataFrame([
+                        {
+                            "Parameter": param,
+                            "Score": f"{details['raw_score']:.2f}",
+                            "Weight": f"{details['weight']:.2f}",
+                            "Weighted Score": f"{details['weighted_score']:.2f}"
+                        }
+                        for param, details in scores.items()
+                    ])
+                    
+                    st.dataframe(
+                        scores_df,
+                        hide_index=True,
+                        use_container_width=True
+                    )
+                    
+                    st.markdown("</div>", unsafe_allow_html=True)
+                else:
+                    st.error("No parameters were successfully evaluated")
+                    return
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
+            st.exception(e)  # Show detailed error in development
 
 def main():
     setup_page_config()

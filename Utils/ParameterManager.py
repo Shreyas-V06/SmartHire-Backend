@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from typing import Dict
 
 class ParameterManager:
     def __init__(self):
@@ -31,19 +32,32 @@ class ParameterManager:
         with open(self.file_path, 'w') as file:
             json.dump(parameters, file, indent=4)
     
-    def get_parameter_details(self):
-        """Get parameters in a format suitable for scoring engine"""
-        params = self.load_parameters()
-        params_dict = {}
-        
-        for param in params:
-            key = param["name"].lower().replace(" ", "_")
-            params_dict[key] = {
-                "type": param["category"],
-                "weight": param["weight"],  # Remove division by 10
-                "max_value": param.get("max_value"),
-                "benefit_type": "higher" if param.get("benefit_type") == "High is better" else "lower",
-                "description": param["name"]
+    def get_parameter_details(self) -> Dict:
+        """Load and convert parameters to dictionary format."""
+        try:
+            params = self.load_parameters()
+            return {
+                param["name"].lower().replace(" ", "_"): {
+                    "type": param["category"],
+                    "weight": param["weight"],
+                    "max_value": param.get("max_value"),
+                    "benefit_type": "higher" if param.get("benefit_type") == "High is better" else "lower",
+                    "description": param["name"]
+                }
+                for param in params
             }
+        except Exception as e:
+            print(f"Error getting parameter details: {e}")
+            return {}
+
+    def validate_parameter(self, param: Dict) -> bool:
+        required_fields = ["name", "category", "weight"]
+        if not all(field in param for field in required_fields):
+            return False
             
-        return params_dict
+        if param["category"].lower() == "quantitative":
+            return "max_value" in param and "benefit_type" in param
+        elif param["category"].lower() in ["boolean", "textual"]:
+            return True
+            
+        return False
