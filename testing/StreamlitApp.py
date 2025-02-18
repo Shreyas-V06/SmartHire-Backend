@@ -1,17 +1,24 @@
 import streamlit as st
 import pandas as pd
-from UserInterface.ModelInitializers.DataIngestion import LoadDocument
-from UserInterface.ScoreCalculators import (
+import sys
+import os
+
+# Add project root to Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from core.ModelInitializers.DataIngestion import LoadDocument
+from core.ScoreCalculators.ScoreCalculators import (
     CalculateQuantitativeScore, 
     CalculateBooleanScore,
-    CalculateTextualScore  # Add import
+    CalculateTextualScore
 )
-from UserInterface.ModelInitializers.Model import LoadModel
-from UserInterface.ModelInitializers.Embedding import DownloadGeminiEmbedding
-from AdminInterface.ClassificationModel import ClassifyParameter
-import plotly.graph_objects as go
+from core.ModelInitializers.Model import LoadModel
+from core.ModelInitializers.Embedding import DownloadGeminiEmbedding
+from interfaces.admin.ClassificationModel import ClassifyParameter
 import time
-from Utils.ParameterManager import ParameterManager
+from interfaces.utils.ParameterManager import ParameterManager
 
 def setup_page_config():
     st.set_page_config(

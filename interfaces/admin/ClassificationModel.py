@@ -1,3 +1,5 @@
+# TO BE USED IN ACTUAL CODE
+
 import os
 from dotenv import load_dotenv
 from llama_index.llms.gemini import Gemini
@@ -7,7 +9,8 @@ google_api_key=os.getenv('GOOGLE_API_KEY')
 llm = Gemini(models='gemini-1.5-pro',api_key=google_api_key)
 
 def ClassifyParameter(parameter):
-    # CLASSIFICATION PROMPT:
+    # CLASSIFICATION PROMPT TO CLASSIFY THE GIVEN PARAMETER INTO ONE OF THREE CATEGORIES
+    
     prompt = f"""
     You are an AI system designed to assist in resume screening. 
     Your task is to classify the given parameter into one of three categories:

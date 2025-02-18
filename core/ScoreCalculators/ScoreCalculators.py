@@ -98,5 +98,3 @@ Now, evaluate the resume accordingly."""
     except Exception as e:
         print(f"Error in textual scoring: {str(e)}")
         return 0.0
-
-
