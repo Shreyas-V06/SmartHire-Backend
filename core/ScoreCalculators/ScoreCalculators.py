@@ -1,3 +1,5 @@
+#IMPORT IN ACTUAL
+
 import re
 import time
 from llama_index.llms.gemini import Gemini
@@ -9,13 +11,10 @@ load_dotenv()
 google_api_key = os.getenv('GOOGLE_API_KEY')
 finetuned_api_key = os.getenv('FINETUNED_API_KEY')
 
-def extract_number(text):
-    """Extract the first number from text."""
-    numbers = re.findall(r'\d*\.?\d+', str(text))
-    return float(numbers[0]) if numbers else 0
 
+#SCORING MECHANISM FOR QUANTITATIVE PARAMETERS
 def CalculateQuantitativeScore(parameter, max_value, benefit_type, query_engine):
-    """Calculate score for quantitative parameters using RAG."""
+    
     try:
         query_text = f"What is the {parameter}? Return only the numerical value."
         response = query_engine.query(query_text)
@@ -24,21 +23,23 @@ def CalculateQuantitativeScore(parameter, max_value, benefit_type, query_engine)
         if not response:
             return 0
             
-        raw_value = extract_number(str(response))
+        raw_value = float(str(response))
         
-        # Normalize the score to percentage (0-100)
+        
         if benefit_type == "higher":
             score = min((raw_value / max_value) * 100, 100)
-        else:  # Low is better
+        else:  
             score = max((1 - (raw_value / max_value)) * 100, 0)
         
         return score
+    
     except Exception as e:
         print(f"Error in quantitative scoring: {e}")
         return 0
-    
+ 
+#SCORING MECHANISM FOR BOOLEAN PARAMETERS   
 def CalculateBooleanScore(parameter, query_engine):
-    """Calculate score for boolean parameters."""
+    
     try:
         query_text = f"Does the candidate have {parameter}? Answer with True or False only."
         response = query_engine.query(query_text)
@@ -49,8 +50,10 @@ def CalculateBooleanScore(parameter, query_engine):
         print(f"Error in boolean scoring: {e}")
         return 0
     
+    
+#SCORING MECHANISM FOR TEXTUAL PARAMETERS      
 def CalculateTextualScore(parameter: str, resume_text: str) -> float:
-    """Calculate score for textual parameters using Gemini model."""
+    
     try:
         ft_api_key = os.getenv('FINETUNED_API_KEY')  # Get API key 
         if not ft_api_key:
@@ -58,7 +61,6 @@ def CalculateTextualScore(parameter: str, resume_text: str) -> float:
             
         model = Gemini(api_key=ft_api_key)
         
-        # First get evaluation response
         eval_prompt = f"""
         You are an expert evaluator for an AI-powered recruitment system called SmartHire. Your task is to assess a candidate's depth of knowledge in a specific *textual parameter* based on their resume.  
 
@@ -82,12 +84,10 @@ def CalculateTextualScore(parameter: str, resume_text: str) -> float:
 Now, evaluate the resume accordingly."""
 
         evaluation = model.complete(eval_prompt)
-        
-        # Then extract just the score
+              
         score_prompt = evaluation.text + "\nBased on the given evaluation\nWhat is the score? Give the correct numerical value with no additional words"
         score_response = model.complete(score_prompt)
-        
-        # Convert score to float and ensure it's between 0-100
+                
         try:
             score = float(score_response.text.strip())
             return score

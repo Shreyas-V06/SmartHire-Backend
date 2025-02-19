@@ -1,3 +1,6 @@
+#IMPORT IN ACTUAL 
+
+
 from llama_index.core import Document, SimpleDirectoryReader
 import tempfile
 import os
@@ -12,15 +15,14 @@ import os
 
 def extract_sections(text):
     """Extract common resume sections from text"""
-    # Basic cleanup
+    
     text = text.replace('\n\n', '\n').strip()
     
-    # Try to identify sections
+    #Dividing the resume into sections for accurate extraction
     experience_section = ""
     education_section = ""
     skills_section = ""
-    
-    # Simple section detection
+       
     sections = text.split('\n')
     current_section = ""
     
@@ -51,7 +53,7 @@ def extract_sections(text):
         "skills": skills_section.strip(),
     }
 
-# Fix the parameter name to match RateLimiter class
+# Rate limiter for API requests
 rate_limiter = RateLimiter(max_requests=50, window_size=60)
 
 def get_cache_path(file_hash):
@@ -73,7 +75,7 @@ def LoadDocument(uploaded_file):
         # Load using SimpleDirectoryReader
         documents = SimpleDirectoryReader(input_files=["temp_upload.pdf"]).load_data()
         
-        # Clean up
+        
         import os
         os.remove("temp_upload.pdf")
         
