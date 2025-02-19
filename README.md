@@ -158,11 +158,11 @@ graph TD;
 
 ## 🙌 Credits
 
-This project was developed by **Runtime Terror** as part of **Epitome 25** to enhance AI-driven hiring. Special thanks to:
-
-Sohan, Saahil, and Me – For designing, building, and optimizing the system.
-Open-Source Community – For the tools and frameworks that made this possible.
-Friends & Supporters – For valuable feedback and insights.
-AI Tools – For powering the core of our system.
+This project was developed by **Runtime Terror** as part of **Epitome 25** to enhance AI-driven hiring. 
+Special thanks to:
+Sohan, Saahil, and Me (Shreyas) – For designing, building, and optimizing the system. <br>
+Open-Source Community – For the tools and frameworks that made this possible. <br>
+Friends & Supporters – For valuable feedback and insights. <br>
+AI Tools – For powering the core of our system. <br>
 
 Built with ☕, ❤️, and endless debugging..
