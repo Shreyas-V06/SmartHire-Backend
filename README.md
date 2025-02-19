@@ -13,7 +13,6 @@ Welcome to **SmartHire**, An AI-driven resume filtering system that intelligentl
 - ✅ **Semantic Evaluation** - Goes beyond basic keyword searches to provide semantic understanding of job descriptions and resumes. 
 - ✅ **Dynamic Weight Assignment** - Adjust importance for each parameter to fine-tune ranking.  
 - ✅ **AI-Driven Resume Parsing** - Extracts relevant details like skills, experience, and qualifications.  
-- ✅ **Eliminates Resume Formatting Issues** - Processes resumes in various formats (PDF, DOCX, etc.) without rejection due to design or structure.  
 
 ---
 
