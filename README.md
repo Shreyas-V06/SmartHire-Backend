@@ -159,7 +159,7 @@ graph TD;
 ## 🙌 Credits
 
 This project was developed by **Runtime Terror** as part of **Epitome 25** to enhance AI-driven hiring. 
-Special thanks to:
+Special thanks to: <br>
 Sohan, Saahil, and Me (Shreyas) – For designing, building, and optimizing the system. <br>
 Open-Source Community – For the tools and frameworks that made this possible. <br>
 Friends & Supporters – For valuable feedback and insights. <br>
