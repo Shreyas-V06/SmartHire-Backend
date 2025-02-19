@@ -1,6 +1,5 @@
 #IMPORT IN ACTUAL 
 
-
 from llama_index.core import Document, SimpleDirectoryReader
 import tempfile
 import os
@@ -13,45 +12,6 @@ import hashlib
 import pickle
 import os
 
-def extract_sections(text):
-    """Extract common resume sections from text"""
-    
-    text = text.replace('\n\n', '\n').strip()
-    
-    #Dividing the resume into sections for accurate extraction
-    experience_section = ""
-    education_section = ""
-    skills_section = ""
-       
-    sections = text.split('\n')
-    current_section = ""
-    
-    for line in sections:
-        line = line.strip()
-        lower_line = line.lower()
-        
-        if any(keyword in lower_line for keyword in ['experience', 'work history', 'employment']):
-            current_section = "experience"
-            continue
-        elif any(keyword in lower_line for keyword in ['education', 'academic', 'qualification']):
-            current_section = "education"
-            continue
-        elif any(keyword in lower_line for keyword in ['skills', 'technologies', 'competencies']):
-            current_section = "skills"
-            continue
-            
-        if current_section == "experience":
-            experience_section += line + "\n"
-        elif current_section == "education":
-            education_section += line + "\n"
-        elif current_section == "skills":
-            skills_section += line + "\n"
-    
-    return {
-        "experience": experience_section.strip(),
-        "education": education_section.strip(),
-        "skills": skills_section.strip(),
-    }
 
 # Rate limiter for API requests
 rate_limiter = RateLimiter(max_requests=50, window_size=60)

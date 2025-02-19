@@ -3,27 +3,33 @@ An AI-driven resume filtering system that intelligently ranks and shortlists can
 
 ## Features
 
-- ✅ **Customizable Evaluation Parameters** – Admins can define their own job-specific criteria for filtering resumes.  
-- ✅ **Semantic Evaluation** – Goes beyond basic keyword searches to provide semantic understanding of job descriptions and resumes. 
-- ✅ **Dynamic Weight Assignment** – Adjust importance for each parameter to fine-tune ranking.  
-- ✅ **AI-Driven Resume Parsing** – Extracts relevant details like skills, experience, and qualifications.  
-- ✅ **Eliminates Resume Formatting Issues** – Processes resumes in various formats (PDF, DOCX, etc.) without rejection due to design or structure.  
+- ✅ **Customizable Evaluation Parameters** - Admins can define their own job-specific criteria for filtering resumes.  
+- ✅ **Semantic Evaluation** - Goes beyond basic keyword searches to provide semantic understanding of job descriptions and resumes. 
+- ✅ **Dynamic Weight Assignment** - Adjust importance for each parameter to fine-tune ranking.  
+- ✅ **AI-Driven Resume Parsing** - Extracts relevant details like skills, experience, and qualifications.  
+- ✅ **Eliminates Resume Formatting Issues** - Processes resumes in various formats (PDF, DOCX, etc.) without rejection due to design or structure.  
 ---
+## Architecture
 
+### Loading Resume
+The resume processing pipeline follows these key steps:
+1. User uploads the PDF document of Resume
+2. Text is extracted using LlamaIndex's SimpleDirectoryReader function
+3. Text chunking occurs for optimal processing
+4. Gemini embedding generation occurs 
+5. Storage in Vector Store for efficient retrieval
 
-## 🏆 Why This Over Traditional ATS?  
+```mermaid
+graph TD
+    A[Start] -->|Upload Resume| B[/PDF Document/]
+    B -->|Extract Text| C[SimpleDirectoryReader]
+    C -->|Chunk Text| D[Text Chunking]
+    D -->|Generate Embeddings| E[Gemini Embeddings]
+    E -->|Store in Vector DB| F[(Vector Store)]
+    F -->|Ready for Retrieval| G[End]
+```
 
-| Feature                     | Traditional ATS  | AI-Powered Filtering       |
-|-----------------------------|-----------------|---------------------------|
-| **Keyword Matching**        | ✅ Yes         | ❌ No (Understands Context) |
-| **Handles Formatting Issues** | ❌ No        | ✅ Yes                     |
-| **Custom Parameter Selection** | ❌ Limited   | ✅ Fully Customizable      |
-| **AI-Based Resume Scoring** | ❌ No          | ✅ Yes                     |
-| **Supports Various File Types** | ❌ No (TXT Only) | ✅ Yes (PDF, DOCX, TXT)  |
-
-
-This will render a **clean and readable table** in GitHub’s README preview. **Copy-paste this directly** and your comparison section will look professional. 🚀
-
+---
 
 SmartHire leverages advanced NLP capabilities from LlamaIndex and Gemini to evaluate resumes across multiple parameters:
 
