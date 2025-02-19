@@ -4,7 +4,7 @@ Welcome to **SmartHire**, An AI-driven resume filtering system that intelligentl
 
 ---
 
-## 🌟Quick Overivew
+## 🌟Quick Introduction
 
   Hiring the right candidates is challenging, with companies spending significant time reviewing resumes even after automation. Existing methods often rely on rigid filtering, missing strong candidates and failing to provide meaningful shortlisting. Our solution analyzes resumes in context, allowing recruiters to set custom criteria like skills, proficiency , education and even Github. With weighted scoring, it scores candidates based on relevance, enabling companies to focus on top applicants and streamline the hiring process efficiently.
 
