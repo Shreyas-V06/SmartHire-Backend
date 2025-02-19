@@ -11,22 +11,16 @@ An AI-driven resume filtering system that intelligently ranks and shortlists can
 ---
 ## Architecture
 
-### Loading Resume
-The resume processing pipeline follows these key steps:
-1. User uploads the PDF document of Resume
-2. Text is extracted using LlamaIndex's SimpleDirectoryReader function
-3. Text chunking occurs for optimal processing
-4. Gemini embedding generation occurs 
-5. Storage in Vector Store for efficient retrieval
+### Document Processing Flow
 
 ```mermaid
 graph TD
-    A[Start] -->|Upload Resume| B[/PDF Document/]
-    B -->|Extract Text| C[SimpleDirectoryReader]
+    A[Applicant] -->|Uploads Resume| B[/PDF Document/]
+    B -->|Extracts Text| C[SimpleDirectoryReader]
     C -->|Chunk Text| D[Text Chunking]
     D -->|Generate Embeddings| E[Gemini Embeddings]
     E -->|Store in Vector DB| F[(Vector Store)]
-    F -->|Ready for Retrieval| G[End]
+    F -->G[Ready for Retrieval]
 ```
 
 ---
