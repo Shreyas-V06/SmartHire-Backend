@@ -1,4 +1,4 @@
-# SmartHire🤖
+# SmartHire🤖 - First Runner up (Epitome 25)
 
 Welcome to **SmartHire**, An AI-driven resume filtering system that intelligently ranks and shortlists candidates based on job-specific criteria. 
 
